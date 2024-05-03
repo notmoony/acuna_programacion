@@ -1,6 +1,6 @@
-namespace tp1
+namespace acunatp1
 {
-    public class Program()
+public class Program()
     {
         public static void Correr()
         {
@@ -12,30 +12,31 @@ namespace tp1
     class Juego
     {
         int frame;
-        Personaje jugador, bicho;
+        Personaje jugador;
+        List<Personaje> bicho;
+        Arma arma;
+        List<Arma> disparo;
         Habitacion habitacion;
         Random rand;
 
+
+
         public void CorrerJuego()
         {
-            // Inicializacion
+            
             Inicializacion();
 
-            // Dibujo el primer cuadro
             DibujarPantalla();
 
-            // Game Loop!
             while (true)
             {
-                // Escucho Input
+                
                 ConsoleKeyInfo? input = null;
                 if (Console.KeyAvailable)
                     input = Console.ReadKey();
 
-                // Actualizo Datos
                 ActualizarDatos(input);
 
-                // Dibujo Pantalla
                 DibujarPantalla();
 
                 Thread.Sleep(1000);
@@ -45,38 +46,82 @@ namespace tp1
         void Inicializacion()
         {
             frame = 0;
-            habitacion = new Habitacion(15, 10);
-            jugador = new Personaje(2, 2, habitacion, '^');
-            bicho = new Personaje(8, 5, habitacion, '=');
+            habitacion = new Habitacion(26, 20);
+            jugador = new Personaje(13, 17, habitacion, '^');
             rand = new Random();
+
+            bicho = new List<Personaje>();
+
+            for (int fila = 0; fila < 3; fila++)
+            {
+                for (int columna = 0; columna < 3; columna++)
+                {
+                    int x = 13 + columna * 2; 
+                    int y = 1 + fila * 2; 
+                    
+                    bicho.Add(new Personaje(x, y, habitacion, '='));
+                }
+            }
+            
+            disparo = new List<Arma>();
+
         }
 
         void ActualizarDatos(ConsoleKeyInfo? input)
         {
-            // Actualizo el frame
+
             frame++;
 
             if (input.HasValue)
             {
                 var tecla = input.Value.Key;
 
-                // Muevo al jugador
                 if (tecla == ConsoleKey.RightArrow)
                     jugador.MoverHacia(1, 0);
                 if (tecla == ConsoleKey.LeftArrow)
                     jugador.MoverHacia(-1, 0);
+                if(tecla == ConsoleKey.Spacebar)
+                    Disparar();
+                                        
+                if(tecla == ConsoleKey.Escape)
+                    Environment.Exit(0);
             }
 
-            // Muevo al goblin (es un bicho)
-            bicho.MoverHacia(rand.Next(-1, 2), rand.Next(-1, 2));
+            foreach (var bicho in bicho)
+            {
+                bicho.MoverHacia(rand.Next(-1, 2), 0);               
+
+            }
+
+            foreach (var disparo in disparo)
+            {
+                disparo.MoverHacia(0, -1);               
+
+            }
+
+            void Disparar()
+            {
+                disparo.Add(new Arma(jugador.x, jugador.y -1, habitacion, '|'));
+            }
+
+
         }
 
         void DibujarPantalla()
         {
-            Lienzo lienzo = new Lienzo(15, 10);
+            Lienzo lienzo = new Lienzo(26, 20);
             habitacion.Dibujar(lienzo);
             jugador.Dibujar(lienzo);
-            bicho.Dibujar(lienzo);
+
+            foreach (var bichoPersonaje in bicho)
+            {
+                bichoPersonaje.Dibujar(lienzo);
+            }
+
+            foreach (var disparoArma in disparo)
+            {
+                disparoArma.Dibujar(lienzo);
+            }
 
             lienzo.MostrarEnPantalla();
             Console.WriteLine($"Frame: {frame}");
@@ -85,7 +130,8 @@ namespace tp1
 
     class Personaje
     {
-        private int x, y;
+        public int x;
+        public int y;
         private IMapa mapa;
         private char dibujo;
 
@@ -115,6 +161,13 @@ namespace tp1
         }
     }
 
+    class Arma : Personaje
+    {
+        public Arma(int x, int y, IMapa mapa, char dibujo) : base(x, y, mapa, dibujo)
+        {
+        }
+    }
+
     class Lienzo
     {
         private char[,] celdas;
@@ -134,7 +187,7 @@ namespace tp1
 
         public void MostrarEnPantalla()
         {
-            // Limpio la consola antes de dibujar el nuevo cuadro
+      
             Console.Clear();
 
             for (int y = 0; y < alto; y++)
@@ -159,7 +212,7 @@ namespace tp1
 
         public Habitacion(int ancho, int alto)
         {
-            // Inicializo filas
+        
             filas = new List<Fila>();
 
             filas.Add(new FilaBorde(ancho));
@@ -213,7 +266,7 @@ namespace tp1
 
         internal bool EstaLibre(int x)
         {
-            return celdas[x] == ' ';
+            return celdas[x] == '.';
         }
     }
 
@@ -225,7 +278,7 @@ namespace tp1
 
         protected override void AgregarMedio()
         {
-            celdas.Add(' ');
+            celdas.Add('.');
         }
         protected override void AgregarPunta()
         {
@@ -249,3 +302,4 @@ namespace tp1
         }
     }
 }
+
