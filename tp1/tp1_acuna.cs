@@ -39,7 +39,7 @@ public class Program()
 
                 DibujarPantalla();
 
-                Thread.Sleep(300);
+                Thread.Sleep(1000);
             }
         }
 
@@ -56,8 +56,8 @@ public class Program()
             {
                 for (int columna = 0; columna < 3; columna++)
                 {
-                    int x = 12 + columna * 2; 
-                    int y = 2 + fila * 2; 
+                    int x = 12 + columna * 3; 
+                    int y = 2 + fila * 3; 
                     
                     bicho.Add(new Personaje(x, y, habitacion, '='));
                 }
@@ -89,8 +89,8 @@ public class Program()
 
             foreach (var bicho in bicho)
             {
-                bicho.MoverHacia(rand.Next(-1, 2), 0);               
-
+                bicho.MoverHacia(rand.Next(-1, 2), 0);
+                            
             }
 
             foreach (var disparo in disparo)
@@ -117,7 +117,6 @@ public class Program()
                     {
                         if (disparo[i].ColisionaConBicho(bicho[b]))
                         {
-            
                             disparo.RemoveAt(i);
                             bicho.RemoveAt(b);
                             break;
@@ -154,6 +153,7 @@ public class Program()
     {
         public int x;
         public int y;
+        public List<Personaje> bicho;
         private IMapa mapa;
         private char dibujo;
 
@@ -163,6 +163,8 @@ public class Program()
             this.y = y;
             this.mapa = mapa;
             this.dibujo = dibujo;
+            this.bicho = new List<Personaje>();
+
         }
 
         public void MoverHacia(int x, int y)
@@ -185,7 +187,7 @@ public class Program()
 
     class Arma : Personaje
     {
-        private List<Personaje> bicho;
+        public List<Personaje> bicho;
         public Arma(int x, int y, IMapa mapa, char dibujo, List<Personaje> bicho) : base(x, y, mapa, dibujo)
         {
             this.bicho = bicho;
@@ -200,6 +202,7 @@ public class Program()
                     return true;
                 }
             }
+            
             return false;
         }
 
