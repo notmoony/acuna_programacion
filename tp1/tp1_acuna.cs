@@ -39,15 +39,15 @@ public class Program()
 
                 DibujarPantalla();
 
-                Thread.Sleep(1000);
+                Thread.Sleep(300);
             }
         }
 
         void Inicializacion()
         {
             frame = 0;
-            habitacion = new Habitacion(26, 20);
-            jugador = new Personaje(13, 17, habitacion, '^');
+            habitacion = new Habitacion(26, 15);
+            jugador = new Personaje(13, 12, habitacion, '^');
             rand = new Random();
 
             bicho = new List<Personaje>();
@@ -56,8 +56,8 @@ public class Program()
             {
                 for (int columna = 0; columna < 3; columna++)
                 {
-                    int x = 13 + columna * 2; 
-                    int y = 1 + fila * 2; 
+                    int x = 12 + columna * 2; 
+                    int y = 2 + fila * 2; 
                     
                     bicho.Add(new Personaje(x, y, habitacion, '='));
                 }
@@ -101,15 +101,37 @@ public class Program()
 
             void Disparar()
             {
-                disparo.Add(new Arma(jugador.x, jugador.y -1, habitacion, '|'));
+                disparo.Add(new Arma(jugador.x, jugador.y -1, habitacion, '|', bicho));
             }
 
+            for (int i = disparo.Count - 1; i >= 0; i--)
+            {
+                if (disparo[i].y == 1)
+                {
+                    disparo.RemoveAt(i);
+                }
+
+                else
+                {
+                    for (int b = 0; b < bicho.Count; b++)
+                    {
+                        if (disparo[i].ColisionaConBicho(bicho[b]))
+                        {
+            
+                            disparo.RemoveAt(i);
+                            bicho.RemoveAt(b);
+                            break;
+                        }
+
+                    }
+                }  
+            }
 
         }
 
         void DibujarPantalla()
         {
-            Lienzo lienzo = new Lienzo(26, 20);
+            Lienzo lienzo = new Lienzo(26, 15);
             habitacion.Dibujar(lienzo);
             jugador.Dibujar(lienzo);
 
@@ -163,9 +185,24 @@ public class Program()
 
     class Arma : Personaje
     {
-        public Arma(int x, int y, IMapa mapa, char dibujo) : base(x, y, mapa, dibujo)
+        private List<Personaje> bicho;
+        public Arma(int x, int y, IMapa mapa, char dibujo, List<Personaje> bicho) : base(x, y, mapa, dibujo)
         {
+            this.bicho = bicho;
         }
+
+        public bool ColisionaConBicho(Personaje personaje)
+        {
+            foreach (var bicho in bicho)
+            {
+                if (this.x == bicho.x && this.y == bicho.y)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
     }
 
     class Lienzo
@@ -266,7 +303,7 @@ public class Program()
 
         internal bool EstaLibre(int x)
         {
-            return celdas[x] == '.';
+            return celdas[x] == ' ';
         }
     }
 
@@ -278,7 +315,7 @@ public class Program()
 
         protected override void AgregarMedio()
         {
-            celdas.Add('.');
+            celdas.Add(' ');
         }
         protected override void AgregarPunta()
         {
@@ -302,4 +339,3 @@ public class Program()
         }
     }
 }
-
